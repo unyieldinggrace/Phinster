@@ -4,7 +4,8 @@ namespace Phinster;
 
 function run_command($command) {
   echo "$command\n";
-  passthru($command, $return = 0);
+  $return = 0;
+  passthru($command, $return);
   return ($return === 0);
 }
 
