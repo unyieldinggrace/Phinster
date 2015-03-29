@@ -48,22 +48,14 @@ class DependencyCache {
     $this->read_dependency_cache();
   }
 
-  public function get_file_has_changed($filePath) {
-    if (in_array($filePath, array_keys($this->modifiedFilePaths))) {
-      return $this->modifiedFilePaths[$filePath];
+  public function update_dependency_hashes($filePaths) {
+    $filesModified = false;
+
+    foreach ($filePaths as $filePath) {
+      $filesModified = ($this->update_file_hash($filePath) or $filesModified);
     }
 
-    $currentHash = $this->get_file_hash($filePath);
-    $cachedHash = $this->get_cached_hash($filePath);
-
-    $modified = ($cachedHash !== $currentHash);
-    $this->set_path_modified($filePath, $modified);
-
-    if ($modified) {
-      $this->updatedHashes[$filePath] = $currentHash;
-    }
-
-    return $modified;
+    return $filesModified;
   }
 
   public function write_dependency_cache($fileDependencies, $cachePath = null) {
@@ -78,6 +70,20 @@ class DependencyCache {
     }
 
     file_put_contents($cachePath, json_encode($this->dependencyCache));
+  }
+
+  private function update_file_hash($filePath) {
+    $currentHash = $this->get_file_hash($filePath);
+    $cachedHash = $this->get_cached_hash($filePath);
+
+    $modified = ($cachedHash !== $currentHash);
+    $this->set_path_modified($filePath, $modified);
+
+    if ($modified) {
+      $this->updatedHashes[$filePath] = $currentHash;
+    }
+
+    return $modified;
   }
 
   private function read_dependency_cache($filePath = null) {
@@ -128,6 +134,15 @@ class DependencyCache {
 
 }
 
+$cacheCleared = false;
+
+function clear_dependency_hashes() {
+  global $cacheCleared;
+  $cacheCleared = true;
+
+  @unlink(DependencyCache::DEFAULT_CACHE_PATH);
+}
+
 function get_file_dependencies($task) {
   $fileDependencies = [];
 
@@ -144,17 +159,9 @@ function get_file_dependencies($task) {
   return $fileDependencies;
 }
 
-function requires_rebuild($fileDependencies, $dependencyCache) {
-  foreach ($fileDependencies as $filePath) {
-    if ($dependencyCache->get_file_has_changed($filePath)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function phinster($buildTargets, $args) {
+  global $cacheCleared;
+
   $dependencyCache = new DependencyCache();
   $argCount = count($args);
 
@@ -186,10 +193,11 @@ function phinster($buildTargets, $args) {
 
     $task = $buildTargets[$target];
     $fileDependencies = get_file_dependencies($task);
+    $filesHaveChanged = $dependencyCache->update_dependency_hashes($fileDependencies);
 
     $checkDependencies = (!$alwaysRun and isset($task['file_dependencies']));
 
-    if ($checkDependencies and !requires_rebuild($fileDependencies, $dependencyCache)) {
+    if ($checkDependencies and !$filesHaveChanged) {
       echo "Skipping target \"$target\", dependencies have not changed.\n";
       continue;
     }
@@ -206,8 +214,10 @@ function phinster($buildTargets, $args) {
     }
 
     if ($buildSucceeded) {
-      $dependencyCache->write_dependency_cache($fileDependencies);
       echo "Build command for target \"$target\" completed successfully :)\n";
+      if (!$cacheCleared) {
+        $dependencyCache->write_dependency_cache($fileDependencies);
+      }
     } else {
       echo "Build command for target \"$target\" failed :(\n";
     }

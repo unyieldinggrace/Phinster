@@ -7,6 +7,7 @@ include_once(__DIR__.'/phinster.php');
 $buildTargets = [
   'clean' => [
     'build_function' => function () {
+      clear_dependency_hashes();
       return run_command('rm -rf myapp *.o *.c');
     },
   ],

@@ -34,9 +34,7 @@ If the file_dependencies key does not exist, the build command will always be ru
 ### build_function
 This can be a string, in which case that string will be run as system command.  Alternatively, this can be a function which must either return true (indicating that the build succeeded) or false (indicating that the build failed).
 
-### always_run
-If this key is present, and set to true, the build command will always be run even if all file dependencies are up to date (can be useful for things like running the test suite).
-
+### Calling ```phinster()```
 The build.php script should finish with a call to ```phinster($buildTargets, $argv);```, which will actually start the build process based on the command line arguments.
 
 ## Helper functions
@@ -50,3 +48,11 @@ The phinster.php file defines some helper functions which can make your file_dep
 * *get_files_under_directory_matching_pattern($path, $pattern)*
 
   Same as get_all_paths_under_directory(), but only returns files that match the given regexp pattern.
+
+* *clear_dependency_hashes()*
+
+    Clears the cached hashes of file dependencies.  If this is run during a build command, the hidden file ```.phinsterhashes``` will be deleted so that the next build command run will treat all files as modified.  I usually include a call to this function in my ```clean``` target, so that builds done after "cleaning" are builds done from scratch.
+
+## Command-line options
+### --always-run
+If ```--always-run``` is present in the command line arguments, the build command will always be run even if all file dependencies are up to date (can be useful for things like running the test suite).
