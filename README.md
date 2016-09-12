@@ -3,42 +3,42 @@ Self-contained build system in PHP
 
 ![Picture of "Finster" from Power Rangers](http://www.rovang.org/wiki/finster.jpg "Phinster is named after the monster-maker 'Finster' from Power Rangers")
 
-## Example usage
-See the ```build.php``` file in the root of the repository for an example build script.
+## How to Install
+If you clone this repository, you can install Phinster with the following commands:
+
+```
+sudo cp phinster-lib /usr/local/lib/phinster
+sudo cp run-phinster.sh /usr/local/bin/phinster
+sudo chmod +x /usr/local/bin/phinster
+```
+
+Note that PHP needs to be available on your system for Phinster to run.
 
 ## How to Use
-Put phinster.php and build.php in the root directory of your app.  
-* phinster.php - contains all the code to actually run build commands.  
-* build.php - contains the definitions of targets for your project and the commands to build them.
+Create a build.php in the root directory of your app (you can see some examples of ```build.php``` files for different types of projects in the "examples" directory).
 
 After you edit the build.php file to suit your project, you can run phinster like this:
-```php build.php myapp```
+```phinster myapp```
 
 Where "myapp" is the name of the build target you want to build.
 
-No other code is necessary, nothing needs to be installed, except that PHP has to be available on your system.
-
 ## The build.php file
-The build.php file in the repository is an example of a build file used to build a simple Vala app.  It's pretty self-explanatory.
+The build.php file in the examples directory is an example of a build file used to build a simple Vala app.  It's pretty self-explanatory.
 
-The keys of the $buildTargets array are the names of targets that you can specify on the command line.  The sub-array for each target has three possible child keys:
+The keys of the $buildTargets array are the names of targets that you can specify on the command line.  The sub-array for each target has two child keys:
 
-### file_dependencies
-This can either be an array of file paths, or a function that returns an array of file paths.  In the included example file, a function is used to
-return all the files ending in ".vala" under the "src" directory.
-
-Phinster will take a hash of each file and compare it to a cached hash.  If the hash of one or more files has changed since the last time the build command succeeded, the build command will be run.  Phinster stores the cached hashes of previous builds in a hidden file ".phinsterhashes".
-
-If the file_dependencies key does not exist, the build command will always be run.
-
-### build_function
+### BuildFunction
 This can be a string, in which case that string will be run as system command.  Alternatively, this can be a function which must either return true (indicating that the build succeeded) or false (indicating that the build failed).
 
-### Calling ```phinster()```
-The build.php script should finish with a call to ```phinster($buildTargets, $argv);```, which will actually start the build process based on the command line arguments.
+### FileDependencies (Optional)
+This can either be an array of file paths, or a function that returns an array of file paths.  In the included example build.php for a Vala project, a function is used to return all the files ending in ".vala" under the "src" directory.
+
+Phinster will take a hash of each file and compare it to a cached hash.  If the hash of one or more files has changed since the last time the build command succeeded, the build command will be run.  Phinster stores the cached hashes of previous builds in a hidden file named ".phinsterhashes".
+
+If the FileDependencies key does not exist, the build command will always be run.
 
 ## Helper functions
-The phinster.php file defines some helper functions which can make your file_dependencies and build_function a bit shorter:
+Phinster provides some helper functions which can make your FileDependencies and BuildFunction functions a bit shorter:
 * *run_command($command)*
 
   runs the specified command string, passing any output through to stdout.  Returns true if the return code from the operating system was zero, otherwise returns false to indicate a failed build.
@@ -48,11 +48,6 @@ The phinster.php file defines some helper functions which can make your file_dep
 * *get_files_under_directory_matching_pattern($path, $pattern)*
 
   Same as get_all_paths_under_directory(), but only returns files that match the given regexp pattern.
-
 * *clear_dependency_hashes()*
 
-    Clears the cached hashes of file dependencies.  If this is run during a build command, the hidden file ```.phinsterhashes``` will be deleted so that the next build command run will treat all files as modified.  I usually include a call to this function in my ```clean``` target, so that builds done after "cleaning" are builds done from scratch.
-
-## Command-line options
-### --always-run
-If ```--always-run``` is present in the command line arguments, the build command will always be run even if all file dependencies are up to date (can be useful for things like running the test suite).
+   Clears the cached hashes of file dependencies.  If this is run during a build command, the hidden file ```.phinsterhashes``` will be deleted so that the next build command run will treat all files as modified.  I usually include a call to this function in my ```clean``` target, so that builds done after "cleaning" are builds done from scratch.
