@@ -43,6 +43,13 @@ $buildTargets['networktest'] = [
 ];
 ```
 
+## Why do this?
+
+PHP is a great scripting language, with especially good OS integration.  Yet many PHP projects are still using Phing for build management.  That means that 
+programmers who *already know PHP* are trying to write build scripts in declarative XML.  It's a total mismatch when PHP already does this job so well.
+
+So I wanted to simplify things, and let PHP programmers write their build scripts in the obvious language: PHP.
+
 ## How to Install
 If you clone this repository, you can install Phinster in Linux by running the ```install.sh``` script, which simply does the following:
 
