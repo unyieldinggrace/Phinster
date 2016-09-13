@@ -2,7 +2,9 @@
 
 namespace Phinster;
 
-class DependencyCache {
+require('IDependencyCache.php');
+
+class DependencyCache implements IDependencyCache {
 
 	const DEFAULT_CACHE_PATH = '.phinsterhashes';
 
@@ -10,40 +12,46 @@ class DependencyCache {
 	private $updatedHashes = [];
 	private $modifiedFilePaths = [];
 
+	private static $cacheCleared = false;
+
 	public function __construct() {
-		$this->read_dependency_cache();
+		$this->readDependencyCache();
 	}
 
-	public function update_dependency_hashes($filePaths) {
+	public function UpdateDependencyHashes($filePaths) {
 		$filesModified = false;
 
 		foreach ($filePaths as $filePath) {
-			$filesModified = ($this->update_file_hash($filePath) or $filesModified);
+			$filesModified = ($this->updateFileHash($filePath) or $filesModified);
 		}
 
 		return $filesModified;
 	}
 
-	public function write_dependency_cache($fileDependencies, $cachePath = null) {
+	public function WriteDependencyCache($fileDependencies, $cachePath = self::DEFAULT_CACHE_PATH) {
+		if (self::$cacheCleared) {
+			return;
+		}
+
 		foreach ($fileDependencies as $hashedFile) {
 			if (isset($this->updatedHashes[$hashedFile])) {
 				$this->dependencyCache[$hashedFile] = $this->updatedHashes[$hashedFile];
 			}
 		}
 
-		if (is_null($cachePath)) {
-			$cachePath = self::DEFAULT_CACHE_PATH;
-		}
-
 		file_put_contents($cachePath, json_encode($this->dependencyCache));
 	}
 
-	private function update_file_hash($filePath) {
-		$currentHash = $this->get_file_hash($filePath);
-		$cachedHash = $this->get_cached_hash($filePath);
+	public static function SetCacheCleared() {
+		self::$cacheCleared = true;
+	}
+
+	private function updateFileHash($filePath) {
+		$currentHash = $this->getFileHash($filePath);
+		$cachedHash = $this->getCachedHash($filePath);
 
 		$modified = ($cachedHash !== $currentHash);
-		$this->set_path_modified($filePath, $modified);
+		$this->setPathModified($filePath, $modified);
 
 		if ($modified) {
 			$this->updatedHashes[$filePath] = $currentHash;
@@ -52,7 +60,7 @@ class DependencyCache {
 		return $modified;
 	}
 
-	private function read_dependency_cache($filePath = null) {
+	private function readDependencyCache($filePath = null) {
 		if (is_null($filePath)) {
 			$filePath = self::DEFAULT_CACHE_PATH;
 		}
@@ -67,20 +75,20 @@ class DependencyCache {
 		}
 	}
 
-	private function get_file_hash($filePath) {
+	private function getFileHash($filePath) {
 		if (!file_exists($filePath)) {
 			return null;
 		}
 
 		$content = file_get_contents($filePath);
 		if ($content) {
-			return $this->hash_content($content);
+			return $this->hashContent($content);
 		}
 
 		return null;
 	}
 
-	private function get_cached_hash($filePath) {
+	private function getCachedHash($filePath) {
 		if (isset($this->dependencyCache[$filePath])) {
 			return $this->dependencyCache[$filePath];
 		}
@@ -88,13 +96,13 @@ class DependencyCache {
 		return null;
 	}
 
-	private function set_path_modified($filePath, $modified) {
+	private function setPathModified($filePath, $modified) {
 		if (!isset($this->modifiedFilePaths[$filePath])) {
 			$this->modifiedFilePaths[$filePath] = $modified;
 		}
 	}
 
-	private function hash_content($content) {
+	private function hashContent($content) {
 		return sha1($content);
 	}
 

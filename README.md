@@ -4,30 +4,33 @@ Self-contained build system in PHP
 ![Picture of "Finster" from Power Rangers](http://www.rovang.org/wiki/finster.jpg "Phinster is named after the monster-maker 'Finster' from Power Rangers")
 
 ## How to Install
-If you clone this repository, you can install Phinster with the following commands:
+If you clone this repository, you can install Phinster in Linux by running the ```install.sh``` script, which simply does the following:
 
 ```
-sudo cp phinster-lib /usr/local/lib/phinster
-sudo cp run-phinster.sh /usr/local/bin/phinster
+sudo cp -r phinster /usr/local/lib
+sudo cp run-phinster.sh /usr/local/bin/
+sudo mv /usr/local/bin/run-phinster.sh /usr/local/bin/phinster
 sudo chmod +x /usr/local/bin/phinster
 ```
 
 Note that PHP needs to be available on your system for Phinster to run.
 
 ## How to Use
-Create a build.php in the root directory of your app (you can see some examples of ```build.php``` files for different types of projects in the "examples" directory).
+Create a ```build.php``` file for your app (you can see some examples of ```build.php``` files for different types of projects in the "examples" directory).
 
 After you edit the build.php file to suit your project, you can run phinster like this:
 ```phinster myapp```
 
-Where "myapp" is the name of the build target you want to build.
+Where "myapp" is the name of the build-target that you want to build.  Phinster looks for ```build.php``` in the current directory.
 
 ## The build.php file
-The build.php file in the examples directory is an example of a build file used to build a simple Vala app.  It's pretty self-explanatory.
+The example ```build.php``` files should be pretty self-explantory. 
 
-The keys of the $buildTargets array are the names of targets that you can specify on the command line.  The sub-array for each target has two child keys:
+The keys of the ```$buildTargets``` array are the names of targets that you can specify on the command line.  If no target is specified, Phinster will list the available targets.
 
-### BuildFunction
+The sub-array for each target has several child keys:
+
+### BuildFunction (Required)
 This can be a string, in which case that string will be run as system command.  Alternatively, this can be a function which must either return true (indicating that the build succeeded) or false (indicating that the build failed).
 
 ### FileDependencies (Optional)
@@ -36,6 +39,9 @@ This can either be an array of file paths, or a function that returns an array o
 Phinster will take a hash of each file and compare it to a cached hash.  If the hash of one or more files has changed since the last time the build command succeeded, the build command will be run.  Phinster stores the cached hashes of previous builds in a hidden file named ".phinsterhashes".
 
 If the FileDependencies key does not exist, the build command will always be run.
+
+### Description (Optional)
+This is a string that Phinster will display when it lists available build targets (this can help give a brief explanation to people who are trying to figure out what your build script does). 
 
 ## Helper functions
 Phinster provides some helper functions which can make your FileDependencies and BuildFunction functions a bit shorter:

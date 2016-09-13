@@ -41,24 +41,8 @@ function get_files_under_directory_matching_pattern($directory, $pattern) {
 $cacheCleared = false;
 
 function clear_dependency_hashes() {
-	global $cacheCleared;
-	$cacheCleared = true;
-
-	@unlink(DependencyCache::DEFAULT_CACHE_PATH);
-}
-
-function get_file_dependencies($task) {
-	$fileDependencies = [];
-
-	if (!isset($task['FileDependencies'])) {
-		return $fileDependencies;
+	if (file_exists(DependencyCache::DEFAULT_CACHE_PATH)) {
+		unlink(DependencyCache::DEFAULT_CACHE_PATH);
+		DependencyCache::SetCacheCleared();
 	}
-
-	if (is_array($task['FileDependencies'])) {
-		$fileDependencies = $task['FileDependencies'];
-	} else if (is_callable($task['FileDependencies'])) {
-		$fileDependencies = $task['FileDependencies']();
-	}
-
-	return $fileDependencies;
 }

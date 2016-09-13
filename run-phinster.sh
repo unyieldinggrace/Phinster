@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-php /usr/local/lib/phinster/phinster.php "$@"
+php /usr/local/lib/phinster/main.php "$@"

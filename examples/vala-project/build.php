@@ -4,13 +4,6 @@ namespace Phinster;
 
 global $buildTargets;
 
-$buildTargets['clean'] = [
-	'BuildFunction' => function () {
-		clear_dependency_hashes();
-		return run_command('rm -rf myapp *.o *.c');
-	},
-];
-
 $buildTargets['myapp'] = [
 	'FileDependencies' => function () {
 		$valaFilePattern = '/.*\.vala$/';
@@ -25,4 +18,18 @@ $buildTargets['myapp'] = [
 
 		return run_command("valac -o myapp --pkg libvala-0.24 $filePaths");
 	},
+	'Description' => 'Builds the application with the Vala compiler.',
+];
+
+$buildTargets['clean'] = [
+	'BuildFunction' => function () {
+		clear_dependency_hashes();
+		return run_command('rm -rf myapp *.o *.c');
+	},
+	'Description' => 'Deletes all build files, the next build will be done from scratch.',
+];
+
+$buildTargets['networktest'] = [
+	'BuildFunction' => 'ping -c 4 8.8.8.8',
+	'Description' => 'Check that there is an active network connection.',
 ];
