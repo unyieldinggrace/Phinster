@@ -5,7 +5,7 @@ Self-contained build system in PHP
 
 ## Example build.php file
 
-```
+```php
 <?php
 
 namespace Phinster;
