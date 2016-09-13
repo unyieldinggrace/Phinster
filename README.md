@@ -87,13 +87,13 @@ This is a string that Phinster will display when it lists available build target
 Phinster provides some helper functions which can make your FileDependencies and BuildFunction functions a bit shorter:
 * ```run_command($command)```
 
-  runs the specified command string, passing any output through to stdout.  Returns true if the return code from the operating system was zero, otherwise returns false to indicate a failed build.
+runs the specified command string, passing any output through to stdout.  Returns true if the return code from the operating system was zero, otherwise returns false to indicate a failed build.
 * ```get_all_paths_under_directory($path)```
 
-  Recursively scans the given directory path and returns a list of all files underneath it.
+Recursively scans the given directory path and returns a list of all files underneath it.
 * ```get_files_under_directory_matching_pattern($path, $pattern)```
 
-  Same as get_all_paths_under_directory(), but only returns files that match the given regexp pattern.
+Same as get_all_paths_under_directory(), but only returns files that match the given regexp pattern.
 * ```clear_dependency_hashes()```
 
-   Clears the cached hashes of file dependencies.  If this is run during a build command, the hidden file ```.phinsterhashes``` will be deleted so that the next build command run will treat all files as modified.  I usually include a call to this function in my ```clean``` target, so that builds done after "cleaning" are builds done from scratch.
+Clears the cached hashes of file dependencies.  If this is run during a build command, the hidden file ```.phinsterhashes``` will be deleted so that the next build command run will treat all files as modified.  I usually include a call to this function in my ```clean``` target, so that builds done after "cleaning" are builds done from scratch.
