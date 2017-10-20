@@ -11,11 +11,13 @@ class DependencyCache implements IDependencyCache {
 	private $dependencyCache = [];
 	private $updatedHashes = [];
 	private $modifiedFilePaths = [];
+	private $cachePath;
 
 	private static $cacheCleared = false;
 
 	public function __construct() {
 		$this->readDependencyCache();
+		$this->cachePath = getcwd().DIRECTORY_SEPARATOR.self::DEFAULT_CACHE_PATH;
 	}
 
 	public function UpdateDependencyHashes($filePaths) {
@@ -28,7 +30,7 @@ class DependencyCache implements IDependencyCache {
 		return $filesModified;
 	}
 
-	public function WriteDependencyCache($fileDependencies, $cachePath = self::DEFAULT_CACHE_PATH) {
+	public function WriteDependencyCache($fileDependencies) {
 		if (self::$cacheCleared) {
 			return;
 		}
@@ -39,7 +41,7 @@ class DependencyCache implements IDependencyCache {
 			}
 		}
 
-		file_put_contents($cachePath, json_encode($this->dependencyCache));
+		file_put_contents($this->cachePath, json_encode($this->dependencyCache));
 	}
 
 	public static function SetCacheCleared() {
