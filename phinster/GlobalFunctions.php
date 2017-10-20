@@ -11,6 +11,20 @@ function run_command($command) {
 	return ($return === 0);
 }
 
+function run_command_in_dir($command, $dir) {
+	$pwd = getcwd();
+	echo "Saving previous working directory: ".$pwd.PHP_EOL;
+	echo "Switching to working directory: ".$dir;
+	chdir($dir);
+	
+	$result = run_command($command);
+	
+	echo "Switching back to previous working directory: ".$pwd.PHP_EOL;
+	chdir($pwd);
+
+	return $result;
+}
+
 function get_all_paths_under_directory($path) {
 	$filePaths = [];
 	$fileNames = scandir($path);
